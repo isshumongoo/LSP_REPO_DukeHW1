@@ -1,0 +1,43 @@
+AI Usage (Summary + Short Transcript Excerpt)
+Tool(s): ChatGPT (GPT-5 Thinking)
+Dates used: September 2025
+Context: I am new to Java and used AI to help me start, structure, and debug Assignment 2.
+
+Summary — how AI was used
+
+Confirmed the single-repo setup and the required package path: org.howard.edu.lsp.assignment2
+
+Guided the correct folder layout: src/... and data/ (using relative paths)
+
+Provided compile/run commands and stressed running from the project root so data paths resolve
+
+Supplied a working ETL skeleton and helped debug:
+• Package mismatch warnings (treat src/ as the source root)
+• A List.of(...) type inference issue → replaced with header-first List<String[]> construction
+
+Walked through creating products.csv, verifying transformed_products.csv, and committing updates
+
+Actual prompts I asked (examples)
+
+“Is my code in the original repo?”
+
+“How could I approach this assignment to start the code?”
+
+“Can you provide a full code (for ETLPipeline.java)?”
+
+AI response excerpt (short)
+“Create the folder src/org/howard/edu/lsp/assignment2, make sure your file is named ETLPipeline.java, and put
+‘package org.howard.edu.lsp.assignment2;’ at the top. Compile and run from the project root:
+javac src/org/howard/edu/lsp/assignment2/ETLPipeline.java
+java -cp src org.howard.edu.lsp.assignment2.ETLPipeline
+Keep your CSVs in data/ so relative paths resolve.”
+
+(Another excerpt summarized the transform order, BigDecimal HALF_UP rounding, handling header/empty input, and writing transformed_products.csv.)
+
+How I used / modified / discarded the response
+
+Used: Adopted the repo/package structure, relative paths, and compile/run commands. Implemented the ETL flow (uppercase → discount → possible recategorization → price range) and run summary.
+
+Modified: Replaced the List.of(...) header branch with an explicit List<String[]> so the transform method consistently returns List<String[]>; kept BigDecimal HALF_UP rounding; added small comments.
+
+Discarded: Steps that weren’t necessary for my local setup once the project compiled and ran clean

@@ -1,16 +1,25 @@
 package org.howard.edu.lsp.assignment2;
 
 public class ETLPipeline {
+
     public static void main(String[] args) {
         System.out.println("ETL Pipeline starting...");
-        String input = "data/products.csv";
+        String input  = "data/products.csv";
         String output = "data/transformed_products.csv";
 
         try {
-            var rows = extract(input);
-            var transformed = transform(rows);   // now implemented
-            load(output, transformed);
-            // (you'll add the summary counter printing next)
+            var rows = extract(input);                // may include header
+            int read = dataRowCount(rows);            // count data rows (excludes header if present)
+            var transformed = transform(rows);        // transformed data rows only (no header)
+            int transformedCount = transformed.size();
+            int skipped = Math.max(read - transformedCount, 0);
+
+            load(output, transformed);                // writes header + rows
+
+            System.out.printf(
+                "Run summary:%n  rows read: %d%n  transformed: %d%n  skipped: %d%n  output: %s%n",
+                read, transformedCount, skipped, output
+            );
         } catch (java.io.FileNotFoundException e) {
             System.err.println("Error: Missing input file at " + input);
         } catch (java.io.IOException e) {
@@ -18,6 +27,7 @@ public class ETLPipeline {
         }
     }
 
+    /* ========================== EXTRACT ========================== */
     private static java.util.List<String[]> extract(String inputPath) throws java.io.IOException {
         java.util.List<String[]> rows = new java.util.ArrayList<>();
         java.nio.file.Path path = java.nio.file.Path.of(inputPath);
@@ -30,15 +40,15 @@ public class ETLPipeline {
             String line;
             while ((line = br.readLine()) != null) {
                 if (line.isBlank()) continue;
-                String[] cols = line.split(",", -1);
+                String[] cols = line.split(",", -1);           // keep empty fields
                 for (int i = 0; i < cols.length; i++) cols[i] = cols[i].trim();
-                rows.add(cols); // includes header; transform() will skip it
+                rows.add(cols);                                 // may include header
             }
         }
         return rows;
     }
 
-    /* ---------------------- NEW: TRANSFORM (per spec) ---------------------- */
+    /* ========================= TRANSFORM ========================= */
     /**
      * Applies the required transformations in this exact order:
      * 1) Uppercase Name
@@ -46,44 +56,27 @@ public class ETLPipeline {
      * 3) If final price > 500.00 AND original Category == "Electronics", set Category = "Premium Electronics"
      * 4) Compute PriceRange from final price
      *
-     * Input rows may include the header; this method detects and skips it.
-     * Valid data rows must have exactly 4 fields: ProductID, Name, Price, Category.
-     * Returns rows with 5 fields in order: ProductID,Name,Price,Category,PriceRange.
+     * Returns transformed rows only (no header).
      */
     private static java.util.List<String[]> transform(java.util.List<String[]> rows) {
         java.util.List<String[]> out = new java.util.ArrayList<>();
         if (rows == null || rows.isEmpty()) return out;
 
-        int start = 0;
-
-        // Detect and skip header if present: ProductID,Name,Price,Category
-        String[] first = rows.get(0);
-        if (first.length >= 4) {
-            String c0 = first[0].trim();
-            String c1 = first[1].trim();
-            String c2 = first[2].trim();
-            String c3 = first[3].trim();
-            if (c0.equalsIgnoreCase("ProductID")
-                    && c1.equalsIgnoreCase("Name")
-                    && c2.equalsIgnoreCase("Price")
-                    && c3.equalsIgnoreCase("Category")) {
-                start = 1;
-            }
-        }
+        // Detect header: ProductID,Name,Price,Category
+        int start = hasHeader(rows) ? 1 : 0;
 
         for (int i = start; i < rows.size(); i++) {
             String[] r = rows.get(i);
+
             // Validate shape
-            if (r.length != 4) {
-                continue; // skipped row (malformed)
-            }
+            if (r.length != 4) { continue; }
 
             String productIdStr = r[0];
             String name         = r[1];
             String priceStr     = r[2];
             String category     = r[3];
 
-            // Parse productId and price; skip row if bad
+            // Parse productId and price
             int productId;
             double price;
             try {
@@ -93,28 +86,25 @@ public class ETLPipeline {
                 continue; // skip invalid row
             }
 
-            // Keep original category for rule #3
             String originalCategory = category;
 
             // 1) Uppercase name
             name = upper(name);
 
-            // 2) Discount for Electronics, then round HALF_UP to 2 decimals
-            if ("Electronics".equals(originalCategory)) {
-                price = price * 0.90; // 10% off
-                price = round2HalfUp(price);
+            // 2) 10% discount for Electronics, then round HALF_UP to 2 decimals
+            if ("Electronics".equalsIgnoreCase(originalCategory)) {
+                price = round2HalfUp(price * 0.90);
             }
-            // (Non-electronics: no change; will still format to two decimals when writing)
 
-            // 3) Recategorize if final price > 500.00 AND originalCategory was Electronics
-            if (price > 500.00 && "Electronics".equals(originalCategory)) {
+            // 3) Recategorize if final price > 500 AND original was Electronics
+            if (price > 500.00 && "Electronics".equalsIgnoreCase(originalCategory)) {
                 category = "Premium Electronics";
             }
 
             // 4) PriceRange from final price
             String priceRange = computePriceRange(price);
 
-            // Build final row in required order; ensure two decimals in output
+            // Build final row (no header here; load() writes header)
             String formattedPrice = String.format(java.util.Locale.ROOT, "%.2f", price);
             out.add(new String[] {
                 String.valueOf(productId),
@@ -127,23 +117,8 @@ public class ETLPipeline {
 
         return out;
     }
-    /* ---------------------------------------------------------------------- */
 
-    private static String upper(String s) { return s == null ? "" : s.toUpperCase(); }
-
-    private static double round2HalfUp(double value) {
-        java.math.BigDecimal bd = java.math.BigDecimal.valueOf(value);
-        bd = bd.setScale(2, java.math.RoundingMode.HALF_UP);
-        return bd.doubleValue();
-    }
-
-    private static String computePriceRange(double price) {
-        if (price <= 10.00) return "Low";
-        else if (price <= 100.00) return "Medium";
-        else if (price <= 500.00) return "High";
-        else return "Premium";
-    }
-
+    /* =========================== LOAD =========================== */
     private static void load(String outputPath, java.util.List<String[]> rows) throws java.io.IOException {
         java.nio.file.Path out = java.nio.file.Path.of(outputPath);
         java.nio.file.Files.createDirectories(out.getParent());
@@ -159,5 +134,42 @@ public class ETLPipeline {
                 bw.newLine();
             }
         }
+    }
+
+    /* ========================= HELPERS ========================== */
+
+    /** Count data rows, excluding header if present. */
+    private static int dataRowCount(java.util.List<String[]> rows) {
+        if (rows == null || rows.isEmpty()) return 0;
+        int start = hasHeader(rows) ? 1 : 0;
+        return Math.max(rows.size() - start, 0);
+    }
+
+    /** Detect if the first row is the expected header. */
+    private static boolean hasHeader(java.util.List<String[]> rows) {
+        if (rows == null || rows.isEmpty()) return false;
+        String[] first = rows.get(0);
+        if (first.length < 4) return false;
+        return first[0].equalsIgnoreCase("ProductID")
+            && first[1].equalsIgnoreCase("Name")
+            && first[2].equalsIgnoreCase("Price")
+            && first[3].equalsIgnoreCase("Category");
+    }
+
+    private static String upper(String s) {
+        return s == null ? "" : s.toUpperCase();
+    }
+
+    private static double round2HalfUp(double value) {
+        java.math.BigDecimal bd = java.math.BigDecimal.valueOf(value);
+        bd = bd.setScale(2, java.math.RoundingMode.HALF_UP);
+        return bd.doubleValue();
+    }
+
+    private static String computePriceRange(double price) {
+        if (price <= 10.00) return "Low";
+        else if (price <= 100.00) return "Medium";
+        else if (price <= 500.00) return "High";
+        else return "Premium";
     }
 }
