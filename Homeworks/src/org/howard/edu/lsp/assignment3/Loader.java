@@ -16,7 +16,6 @@ import org.howard.edu.lsp.assignment3.util.CsvUtils;
 public class Loader {
 
     public static void writeCsv(Path path, List<String> headers, List<Row> rows) throws IOException {
-        System.out.println("Writing to: " + path);  // Debugging line
         try (BufferedWriter bw = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
 // header
             for (int i = 0; i < headers.size(); i++) {

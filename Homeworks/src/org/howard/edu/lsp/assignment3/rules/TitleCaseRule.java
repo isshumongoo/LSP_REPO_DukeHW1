@@ -19,7 +19,6 @@ public class TitleCaseRule implements TransformationRule {
         if (v.isEmpty()) {
             return;
         }
-        System.out.println("Before TitleCase: " + v);  // Debugging line
         String[] parts = v.toLowerCase().split(" ");
         StringBuilder out = new StringBuilder();
         for (String p : parts) {
@@ -30,7 +29,6 @@ public class TitleCaseRule implements TransformationRule {
             out.append(' ');
         }
         row.put(column, out.toString().trim());
-        System.out.println("After TitleCase: " + out.toString().trim());  // Debugging line
     }
 
 }

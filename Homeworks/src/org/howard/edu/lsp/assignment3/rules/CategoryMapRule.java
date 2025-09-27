@@ -20,9 +20,7 @@ public class CategoryMapRule implements TransformationRule {
     @Override
     public void apply(Row row) {
         String raw = row.get(sourceColumn);
-        System.out.println("Before category map: " + raw);  // Debugging line
         String canon = mapping.getOrDefault(raw.toLowerCase(), raw);  // Normalize case
         row.put(targetColumn, canon);
-        System.out.println("After category map: " + canon);  // Debugging line
     }
 }

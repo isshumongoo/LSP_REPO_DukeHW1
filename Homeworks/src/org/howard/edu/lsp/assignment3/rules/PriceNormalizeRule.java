@@ -33,7 +33,6 @@ public class PriceNormalizeRule implements TransformationRule {
 
             // Apply price normalization for all categories (if needed)
             // Update price with two decimal places
-            System.out.println("After Price Normalize: " + row.get(column));  // Debugging line
         } catch (NumberFormatException e) {
             // Handle parsing error
             System.err.println("Failed to parse price: " + v);

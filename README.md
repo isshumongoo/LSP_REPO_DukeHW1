@@ -26,7 +26,26 @@ This program implements a simple **Extract–Transform–Load (ETL)** pipeline:
 
 The program prints a **run summary** at the end: rows read, transformed, skipped, and the output path.
 
----
 
-## Project Structure
+#ETL Pipeline Project Setup and Execution
+##Step 1: Compile the Java Files
 
+To compile the project, navigate to the root directory where the src folder is located and run the following javac command:
+
+javac -d src/org/howard/edu/lsp/assignment3/bin src/org/howard/edu/lsp/assignment3/*.java src/org/howard/edu/lsp/assignment3/rules/*.java src/org/howard/edu/lsp/assignment3/model/*.java src/org/howard/edu/lsp/assignment3/util/*.java
+
+
+-d flag specifies the output directory where the compiled .class files will be stored (src/org/howard/edu/lsp/assignment3/bin).
+
+This command compiles all Java files in the assignment3, rules, model, and util directories.
+
+##Step 2: Run the Program
+
+Once the files are successfully compiled, you can run the program using the following java command:
+
+java -cp src/org/howard/edu/lsp/assignment3/bin org.howard.edu.lsp.assignment3.ETLMain
+
+
+The -cp option specifies the classpath to the directory containing the compiled .class files (src/org/howard/edu/lsp/assignment3/bin).
+
+The command executes the main class ETLMain, which orchestrates the extraction, transformation, and loading (ETL) of the data.

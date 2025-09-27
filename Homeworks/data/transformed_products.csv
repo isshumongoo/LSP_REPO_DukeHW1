@@ -1,1 +1,7 @@
-ProductID,Name,Price,Category
+ProductID,Name,Price,Category,PriceRange
+1,Book,12.99,Education,Medium
+2,Laptop,899.99,Premium Electronics,Premium
+3,Notebook,2.49,Stationery,Low
+4,Headphones,199.99,Electronics,High
+5,Pencil,0.99,Stationery,Low
+6,Smartphone,629.54,Premium Electronics,Premium

@@ -31,7 +31,6 @@ public class ETLMain {
             // Step 2: Extract data
             ExtractResult er = Extractor.readCsv(in);
             rowsRead = er.rows.size();
-            System.out.println("Headers: " + er.headers);
 
             if (rowsRead == 0) {
                 System.out.println("Warning: No data rows found. Creating output file with just the header.");
@@ -40,10 +39,6 @@ public class ETLMain {
                 System.exit(0);  // Exit early since no data to process
             }
 
-            // Print rows before transformation
-            for (Row row : er.rows) {
-                System.out.println("Row before transformation: " + row.asMap());
-            }
 
             // Step 3: Create transformation pipeline
             Map<String, String> catMap = new HashMap<>();
@@ -67,17 +62,11 @@ public class ETLMain {
                 }
             }
 
-            // Print rows after transformation
-            for (Row row : er.rows) {
-                System.out.println("Row after transformation: " + row.asMap());
-            }
 
             if (!er.headers.contains("PriceRange")) {
                 er.headers.add("PriceRange");
             }
-            for (Row row : er.rows) {
-                System.out.println("Row data: " + row.asMap());
-            }
+
             // Step 5: Load transformed data into output CSV
             Loader.writeCsv(out, er.headers, er.rows);
             System.out.println("ETL completed. Wrote: " + out);

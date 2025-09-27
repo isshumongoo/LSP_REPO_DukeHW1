@@ -15,7 +15,6 @@ public class PriceRangeRule implements TransformationRule {
     @Override
     public void apply(Row row) {
         String priceStr = row.get(priceColumn);
-        System.out.println("Before PriceRange: " + priceStr);  // Debugging line
         try {
             double price = Double.parseDouble(priceStr);
             String priceRange;
@@ -30,7 +29,6 @@ public class PriceRangeRule implements TransformationRule {
             }
 
             row.put("PriceRange", priceRange);
-            System.out.println("After PriceRange: " + priceRange);  // Debugging line
         } catch (NumberFormatException e) {
             row.put("PriceRange", "Unknown");
         }
