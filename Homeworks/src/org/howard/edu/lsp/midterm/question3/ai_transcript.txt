@@ -1,0 +1,21 @@
+You said:
+Of the options to use a strategy interface, enumerate with parameters, keep engine as a composed part,or make car hold references, which of these options utilize composition to solve the problem?
+
+
+ChatGPT said:
+
+Short answer: both options I showed use composition.
+
+Option A — Strategy interface (Trim) → Composition because Car has a field of type Trim and you inject a concrete implementation (BaseTrim, SportTrim, etc.). You can swap the object at runtime:
+
+Car car = new Car(new BaseTrim(), new PetrolEngine());
+car.setTrim(new LuxuryTrim());  // swap = composition
+
+
+Option B — Enum with data (TrimLevel) → Also composition because Car holds a TrimLevel value (plus its data/behavior) and you change that field at runtime:
+
+Car car = new Car(TrimLevel.BASE, new PetrolEngine());
+car.setTrimLevel(TrimLevel.LUXURY);  // swap = composition
+
+
+Both avoid subclassing Car for each trim (the inheritance anti-pattern) and let trim change without changing the car’s type or identity. Use Strategy (Option A) if you want pluggable behaviors and easier testing/mocking; use Enum (Option B) if trims are a small, closed set with simple data/behavior.
