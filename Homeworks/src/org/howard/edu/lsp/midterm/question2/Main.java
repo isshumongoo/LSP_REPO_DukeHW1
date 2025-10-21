@@ -17,11 +17,4 @@ public class Main {
         }
     }
 
-    /*
-     * Rationale (2–3 sentences):
-     * Using method overloading keeps one cohesive "area" concept with multiple signatures,
-     * letting the compiler select the right method by parameter types/arity. This improves API
-     * discoverability and readability compared to separate names like circleArea/rectangleArea,
-     * while still preventing ambiguity via distinct parameter lists.
-     */
 }

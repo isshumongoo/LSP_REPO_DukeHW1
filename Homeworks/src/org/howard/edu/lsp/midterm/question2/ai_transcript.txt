@@ -1,0 +1,444 @@
+You said:
+How can I test this?
+package org.howard.edu.lsp.midterm.question2;
+
+public class AreaCalculator {
+
+    // Circle area: π r^2
+    public static double area(double radius) {
+        if (radius <= 0) {
+            throw new IllegalArgumentException("radius must be > 0");
+        }
+        return Math.PI * radius * radius;
+    }
+
+    // Rectangle area: width * height
+    public static double area(double width, double height) {
+        if (width <= 0 || height <= 0) {
+            throw new IllegalArgumentException("width and height must be > 0");
+        }
+        return width * height;
+    }
+
+    // Triangle area: 1/2 * base * height
+    public static double area(int base, int height) {
+        if (base <= 0 || height <= 0) {
+            throw new IllegalArgumentException("base and height must be > 0");
+        }
+        return 0.5 * base * height;
+    }
+
+    // Square area: side^2
+    public static double area(int side) {
+        if (side <= 0) {
+            throw new IllegalArgumentException("side must be > 0");
+        }
+        return (double) side * side;
+    }
+}
+
+package org.howard.edu.lsp.midterm.question2;
+
+public class Main {
+    public static void main(String[] args) {
+        // Required exact output:
+        System.out.println("Circle radius 3.0 \u2192 area = " + AreaCalculator.area(3.0));
+        System.out.println("Rectangle 5.0 x 2.0 \u2192 area = " + AreaCalculator.area(5.0, 2.0));
+        System.out.println("Triangle base 10, height 6 \u2192 area = " + AreaCalculator.area(10, 6));
+        System.out.println("Square side 4 \u2192 area = " + AreaCalculator.area(4));
+
+        // Exception demo (any message is fine). Trigger by invalid dimension:
+        try {
+            AreaCalculator.area(0);  // invalid square side; should throw
+            System.out.println("ERROR: Exception was not thrown");
+        } catch (IllegalArgumentException ex) {
+            System.out.println("Caught IllegalArgumentException: " + ex.getMessage());
+        }
+    }
+
+}
+
+ChatGPT said:
+
+Here are a few quick ways to test it—pick whichever matches how you’re working.
+
+1) Command line (javac/java)
+
+From your project root (where src/ lives):
+
+Compile to a build folder (creates out/):
+
+# macOS/Linux
+mkdir -p out
+javac -d out src/org/howard/edu/lsp/midterm/question2/AreaCalculator.java src/org/howard/edu/lsp/midterm/question2/Main.java
+
+# Windows PowerShell
+mkdir out
+javac -d out src\org\howard\edu\lsp\midterm\question2\AreaCalculator.java src\org\howard\edu\lsp\midterm\question2\Main.java
+
+
+Run:
+
+# macOS/Linux
+java -cp out org.howard.edu.lsp.midterm.question2.Main
+
+# Windows
+java -cp out org.howard.edu.lsp.midterm.question2.Main
+
+
+You should see exactly:
+
+Circle radius 3.0 → area = 28.274333882308138
+Rectangle 5.0 x 2.0 → area = 10.0
+Triangle base 10, height 6 → area = 30.0
+Square side 4 → area = 16.0
+Caught IllegalArgumentException: side must be > 0
+
+
+If your console can’t render the arrow, replace \u2192 with -> in Main.
+
+2) JShell (super fast spot-checks)
+
+From the project root:
+
+jshell --class-path out
+
+
+Then in JShell:
+
+import org.howard.edu.lsp.midterm.question2.AreaCalculator;
+AreaCalculator.area(3.0);      // expect 28.274333882308138
+AreaCalculator.area(5.0, 2.0); // expect 10.0
+AreaCalculator.area(10, 6);    // expect 30.0
+AreaCalculator.area(4);        // expect 16.0
+AreaCalculator.area(0);        // should throw IllegalArgumentException
+
+3) IDE (IntelliJ/Eclipse/VS Code)
+
+Ensure your files are under src/org/howard/edu/lsp/midterm/question2/.
+
+Right-click Main → Run.
+
+Check the console output matches the four lines + the exception message.
+
+4) Optional: JUnit smoke tests (since you have JUnit slides)
+
+If you’re set up for JUnit 5, add a test file:
+src/test/java/org/howard/edu/lsp/midterm/question2/AreaCalculatorTest.java
+
+package org.howard.edu.lsp.midterm.question2;
+
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+
+class AreaCalculatorTest {
+    @Test void circle_ok()     { assertEquals(Math.PI*9, AreaCalculator.area(3.0), 1e-12); }
+    @Test void rectangle_ok()  { assertEquals(10.0, AreaCalculator.area(5.0, 2.0), 1e-12); }
+    @Test void triangle_ok()   { assertEquals(30.0, AreaCalculator.area(10, 6), 1e-12); }
+    @Test void square_ok()     { assertEquals(16.0, AreaCalculator.area(4), 1e-12); }
+
+    @Test void circle_bad()    { assertThrows(IllegalArgumentException.class, () -> AreaCalculator.area(0.0)); }
+    @Test void rect_bad()      { assertThrows(IllegalArgumentException.class, () -> AreaCalculator.area(5.0, 0.0)); }
+    @Test void tri_bad()       { assertThrows(IllegalArgumentException.class, () -> AreaCalculator.area(-3, 2)); }
+    @Test void square_bad()    { assertThrows(IllegalArgumentException.class, () -> AreaCalculator.area(0)); }
+}
+
+
+Run tests with your IDE or build tool (e.g., Maven/Gradle). The deltas 1e-12 handle floating-point precision.
+
+Quick troubleshooting
+
+“Could not find or load main class …” → Double-check the package name matches the folder path and you used -d out when compiling.
+
+Different numbers → Ensure you didn’t accidentally cast to int. The code uses double for circle/rectangle and returns double everywhere.
+
+Want me to jump to Question 3 now and write the explanation + composition refactor plan?
+
+You said:
+I don't want a out folder
+ChatGPT said:
+
+Perfect — no problem. You can compile and run directly in place without using an out/ directory.
+Here’s how to do it cleanly while keeping your package structure intact. 👇
+
+💻 If you’re using the command line
+
+From the root of your project (where src/ is):
+
+Compile
+# macOS/Linux
+javac src/org/howard/edu/lsp/midterm/question2/*.java
+
+# Windows PowerShell / CMD
+javac src\org\howard\edu\lsp\midterm\question2\*.java
+
+
+This will create .class files inside the same folder as the source files (src/org/howard/edu/lsp/midterm/question2).
+
+Run
+
+Now run Main using the fully qualified package name,
+but point Java to the src folder as the classpath root:
+
+# macOS/Linux
+java -cp src org.howard.edu.lsp.midterm.question2.Main
+
+# Windows
+java -cp src org.howard.edu.lsp.midterm.question2.Main
+
+
+✅ You’ll see:
+
+Circle radius 3.0 → area = 28.274333882308138
+Rectangle 5.0 x 2.0 → area = 10.0
+Triangle base 10, height 6 → area = 30.0
+Square side 4 → area = 16.0
+Caught IllegalArgumentException: side must be > 0
+
+⚠️ Common mistakes
+
+Don’t move .java files outside the package folder — the package line must match the folder path.
+
+When running, always include -cp src (or whatever the root folder is).
+
+Would you like me to walk you through how to test it in VS Code or Eclipse too, in case you’re using one of those?
+
+You said:
+ChatGPT said:
+
+Perfect — your folder layout looks correct 👍
+
+Here’s exactly what to do in your setup:
+
+✅ Compile
+
+Open a terminal inside your project root (LSP_HOMEWORK).
+Run:
+
+javac src/org/howard/edu/lsp/midterm/question2/*.java
+
+
+That will place .class files (compiled bytecode) right next to your .java files.
+
+✅ Run
+
+Then run using:
+
+java -cp src org.howard.edu.lsp.midterm.question2.Main
+
+
+💡 Explanation:
+
+-cp src tells Java “start looking for packages inside the src folder.”
+
+org.howard.edu.lsp.midterm.question2.Main is the fully qualified class name.
+
+✅ Expected Output
+
+You should see:
+
+Circle radius 3.0 → area = 28.274333882308138
+Rectangle 5.0 x 2.0 → area = 10.0
+Triangle base 10, height 6 → area = 30.0
+Square side 4 → area = 16.0
+Caught IllegalArgumentException: side must be > 0
+
+
+If that runs successfully, we can move on to Question 3 — where we’ll talk about the UML with Car, Engine, and how to use composition to switch trim levels dynamically.
+Want to go there next?
+
+You said:
+$ javac src/org/howard/edu/lsp/midterm/question2/*.java
+error: Invalid filename: src/org/howard/edu/lsp/midterm/question2/*.java
+Usage: javac <options> <source files>
+use --help for a list of possible options
+ChatGPT said:
+
+Ah — good catch 👍
+That error usually happens because PowerShell (or some Windows shells) don’t expand * wildcards for Java commands the same way Unix terminals do.
+
+Let’s fix it — you have a few safe options 👇
+
+✅ Option 1: Use dir expansion (PowerShell-friendly)
+
+Run this from your project root (LSP_HOMEWORK):
+
+javac (Get-ChildItem -Path src/org/howard/edu/lsp/midterm/question2/*.java)
+
+
+That tells PowerShell to explicitly pass all .java files to javac.
+
+✅ Option 2: Compile each file explicitly
+javac src/org/howard/edu/lsp/midterm/question2/AreaCalculator.java src/org/howard/edu/lsp/midterm/question2/Main.java
+
+
+This is the simplest and most reliable approach for two files.
+
+✅ Option 3: Switch to Command Prompt (cmd.exe)
+
+If you prefer classic Windows Command Prompt, * expansion works fine there:
+
+javac src\org\howard\edu\lsp\midterm\question2\*.java
+
+
+Then run it with:
+
+java -cp src org.howard.edu.lsp.midterm.question2.Main
+
+
+After compiling, you should see .class files appear in
+src/org/howard/edu/lsp/midterm/question2/.
+
+Then run:
+
+java -cp src org.howard.edu.lsp.midterm.question2.Main
+
+
+and you’ll get your full output.
+
+Would you like me to show you a one-line PowerShell alias you can reuse for compiling everything under src (for all your assignments)?
+
+You said:
+src\org\howard\edu\lsp\midterm\question2\Main.java:6: error: cannot find symbol
+        System.out.println("Circle radius 3.0 \u2192 area = " + AreaCalculator.area(3.0));
+                                                                ^
+  symbol:   variable AreaCalculator
+  location: class Main
+src\org\howard\edu\lsp\midterm\question2\Main.java:7: error: cannot find symbol
+        System.out.println("Rectangle 5.0 x 2.0 \u2192 area = " + AreaCalculator.area(5.0, 2.0));
+                                                                  ^
+  symbol:   variable AreaCalculator
+  location: class Main
+src\org\howard\edu\lsp\midterm\question2\Main.java:8: error: cannot find symbol
+        System.out.println("Triangle base 10, height 6 \u2192 area = " + AreaCalculator.area(10, 6));
+                                                                         ^
+  symbol:   variable AreaCalculator
+  location: class Main
+src\org\howard\edu\lsp\midterm\question2\Main.java:9: error: cannot find symbol
+        System.out.println("Square side 4 \u2192 area = " + AreaCalculator.area(4));
+                                                            ^
+  symbol:   variable AreaCalculator
+  location: class Main
+src\org\howard\edu\lsp\midterm\question2\Main.java:13: error: cannot find symbol
+            AreaCalculator.area(0);  // invalid square side; should throw
+            ^
+  symbol:   variable AreaCalculator
+  location: class Main
+5 errors
+ChatGPT said:
+Thought for 11s
+
+No worries—this just means javac didn’t see AreaCalculator when compiling Main.
+
+Do these quick fixes:
+
+1) Make sure both files have the same package line
+
+At the very top of both files:
+
+package org.howard.edu.lsp.midterm.question2;
+
+2) Save both files in VS Code
+
+(Unsaved changes won’t compile.)
+
+3) Compile both files together and include the classpath
+
+From your project root (LSP_HOMEWORK):
+
+PowerShell / CMD
+
+javac -cp src src/org/howard/edu/lsp/midterm/question2/AreaCalculator.java src/org/howard/edu/lsp/midterm/question2/Main.java
+
+
+(Compiling both at once guarantees Main can “see” AreaCalculator. The -cp src tells the compiler where to look for packaged classes.)
+
+4) Run
+java -cp src org.howard.edu.lsp.midterm.question2.Main
+
+If it still errors, check these:
+
+Filename and class name match: AreaCalculator.java contains public class AreaCalculator.
+
+No duplicate package folders (e.g., accidental src/src/...).
+
+Clean stale .class files (optional):
+
+del src\org\howard\edu\lsp\midterm\question2\*.class
+
+
+then recompile with the command in step 3.
+
+That should resolve the “cannot find symbol: AreaCalculator” errors. Want to move on to Q3 after you get this running?
+
+You said:
+It still says it's the wrong package for some reason
+ChatGPT said:
+
+Got it — that almost always happens because the folder path and the package line don’t match exactly (Java is strict about this).
+Let’s confirm and fix it step-by-step 👇
+
+✅ Step 1: Verify your real path
+
+From your screenshot, the path looks like:
+
+LSP_HOMEWORK
+└── src
+    └── org
+        └── howard
+            └── edu
+                └── lsp
+                    └── midterm
+                        └── question2
+                            ├── AreaCalculator.java
+                            └── Main.java
+
+
+Make sure both files truly live there — not one folder higher or lower (e.g., not inside another src or midterm/question2/question2).
+
+✅ Step 2: Confirm the package line
+
+At the very top of both files, it must be exactly:
+
+package org.howard.edu.lsp.midterm.question2;
+
+
+(no typos, extra spaces, or uppercase letters)
+
+If you copied from a different assignment, the package might still say assignment2 or midterm.doc. Fix that.
+
+✅ Step 3: Re-compile cleanly
+
+Delete any .class files first:
+
+Remove-Item src\org\howard\edu\lsp\midterm\question2\*.class
+
+
+Then compile both:
+
+javac -cp src src/org/howard/edu/lsp/midterm/question2/AreaCalculator.java src/org/howard/edu/lsp/midterm/question2/Main.java
+
+✅ Step 4: Run
+java -cp src org.howard.edu.lsp.midterm.question2.Main
+
+⚠️ If you still get “wrong package”
+
+That means either:
+
+The package statement has a typo, or
+
+You’re running the command from the wrong working directory.
+
+Make sure your terminal is opened in the LSP_HOMEWORK folder (the one that directly contains the src folder).
+
+You can check by typing:
+
+pwd
+
+
+and ensuring it ends with:
+
+.../LSP_HOMEWORK
+
+
+If you want, you can copy-paste the first 3 lines of one of your files here (the package line + imports) and I’ll tell you exactly what’s mismatching.
