@@ -52,11 +52,6 @@ The command executes the main class ETLMain, which orchestrates the extraction, 
 
 # Assignment 6 — IntegerSet with JUnit Testing
 
-Course: Large Scale Programming
-Package: org.howard.edu.lsp.assignment6
-Submission: IntegerSet.java, IntegerSetTest.java
-(Optional) run.bat to automate compile + test run
-
 ## Overview
 
 This assignment implements a reusable IntegerSet class using ArrayList<Integer> and validates all functionality with a full JUnit 5 test suite. The project focuses on correct set operations, exception handling, equality rules, and mutation behavior.
