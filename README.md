@@ -50,66 +50,48 @@ The -cp option specifies the classpath to the directory containing the compiled 
 
 The command executes the main class ETLMain, which orchestrates the extraction, transformation, and loading (ETL) of the data.
 
-#Assignment 6 — IntegerSet with JUnit Testing
+# Assignment 6 — IntegerSet with JUnit Testing
 
 Course: Large Scale Programming
 Package: org.howard.edu.lsp.assignment6
 Submission: IntegerSet.java, IntegerSetTest.java
 (Optional) run.bat to automate compile + test run
 
-##Overview
+## Overview
 
 This assignment implements a reusable IntegerSet class using ArrayList<Integer> and validates all functionality with a full JUnit 5 test suite. The project focuses on correct set operations, exception handling, equality rules, and mutation behavior.
 
-##Features
+## Features
 IntegerSet
-
 Implements:
+- add, remove, contains
+- largest, smallest (with exceptions on empty sets)
+- union, intersect, diff, complement
+- clear, length, isEmpty
+- Correct equals and toString overrides
+- All mutators update this instance, as required
 
-add, remove, contains
-
-largest, smallest (with exceptions on empty sets)
-
-union, intersect, diff, complement
-
-clear, length, isEmpty
-
-Correct equals and toString overrides
-
-All mutators update this instance, as required
-
-JUnit Test Suite
+## JUnit Test Suite
 
 IntegerSetTest.java includes:
+- One test for every public method
+- Extra tests for empty sets, duplicates, self-ops, and mutation safety
+- Verified against all major edge cases
+- All tests pass successfully.
 
-One test for every public method
-
-Extra tests for empty sets, duplicates, self-ops, and mutation safety
-
-Verified against all major edge cases
-
-All tests pass successfully.
-
-##Running the Assignment
+## Running the Assignment
 Manual
 
-From the Homeworks folder:
+From the Homeworks folder (for me):
 
 Compile:
-
 javac -cp ".;lib\junit.jar" src\org\howard\edu\lsp\assignment6\IntegerSet.java src\org\howard\edu\lsp\assignment6\IntegerSetTest.java
 
-
 Run tests:
-
 java -jar lib\junit.jar --class-path src --scan-class-path
 
-Edge Cases Covered
-
-Empty sets
-
-Duplicate adds
-
-set.union(set) and set.diff(set)
-
-Ensuring operations never modify the other set
+## Edge Cases Covered
+- Empty sets
+- Duplicate adds
+- set.union(set) and set.diff(set)
+- Ensuring operations never modify the other set
