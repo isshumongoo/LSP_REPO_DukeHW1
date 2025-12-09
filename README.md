@@ -90,3 +90,50 @@ java -jar lib\junit.jar --class-path src --scan-class-path
 - Duplicate adds
 - set.union(set) and set.diff(set)
 - Ensuring operations never modify the other set
+
+# Final: Password Generator Service
+
+## Overview
+
+This project implements a **Password Generator Service** in Java. The service allows you to generate passwords using multiple algorithms. The password-generation algorithms can be selected at **runtime**, and future algorithms can be added easily without modifying the core codebase.
+
+## Features
+
+### Supported Algorithms:
+- **"basic"**: Generates passwords using `java.util.Random`. The output contains digits only (0-9).
+- **"enhanced"**: Generates passwords using `java.security.SecureRandom`. The output may include letters (A-Z, a-z) and digits (0-9).
+- **"letters"**: Generates passwords with letters only (A-Z, a-z).
+
+### Design Patterns Used:
+- **Singleton**: The `PasswordGeneratorService` class uses the Singleton pattern to ensure there is only one instance of the service.
+- **Strategy**: The service uses the Strategy pattern, allowing users to dynamically change the password-generation algorithm at runtime.
+
+---
+
+## API
+
+### Public Methods
+
+- **`public static PasswordGeneratorService getInstance();`**
+  - Returns the singleton instance of the `PasswordGeneratorService`.
+  
+- **`public void setAlgorithm(String name);`**
+  - Sets the algorithm for password generation. Supported values are:
+    - `"basic"`
+    - `"enhanced"`
+    - `"letters"`
+  
+- **`public String generatePassword(int length);`**
+  - Generates a password of the given length using the selected algorithm.
+  - Throws **`IllegalStateException`** if no algorithm has been selected.
+
+---
+
+## Running the Project
+
+### Step 1: Compile the Java Files
+
+To compile the Java files, navigate to the root directory where the `src` folder is located and run the following `javac` command:
+
+```bash
+javac -cp "lib/junit.jar;src" src/org/howard/edu/lsp/finale/question1/*.java
